@@ -6,6 +6,7 @@ import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class Main {
 
@@ -27,17 +28,24 @@ public class Main {
 
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                double[] values = new double[parts.length - 5];
+                String[] parts = splitStringIntoValues(line);
+                double[] values = new double[parts.length - 6]; // Учитываем только нужные столбцы
                 for (int i = 6; i < parts.length; i++) {
                     if (!parts[i].isEmpty()) {
                         values[i - 6] = Double.parseDouble(parts[i]);
+                    } else {
+                        // Заменяем пропуски на NaN
+                        values[i - 6] = Double.NaN;
                     }
                 }
 
                 double[] normalizedValues = normalize(values);
 
                 writer.write(parts[0]);
+                for (int i = 1; i < 6; i++){
+                    writer.write("," + parts[i]);
+                }
+
                 for (double val : normalizedValues) {
                     writer.write("," + val);
                 }
@@ -63,8 +71,8 @@ public class Main {
 
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
-                double[] values = new double[parts.length - 5];
+                String[] parts = splitStringIntoValues(line);
+                double[] values = new double[parts.length - 6]; // Учитываем только нужные столбцы
                 for (int i = 6; i < parts.length; i++) {
                     if (!parts[i].isEmpty()) {
                         values[i - 6] = Double.parseDouble(parts[i]);
@@ -90,32 +98,80 @@ public class Main {
     }
 
     public static double[] normalize(double[] data) {
-        Mean mean = new Mean();
-        StandardDeviation stdDev = new StandardDeviation();
 
-        double meanValue = mean.evaluate(data);
-        double stdDevValue = stdDev.evaluate(data);
+        double meanValue = mean(data);
+        double stdDevValue = stdDev(data);
 
         double[] normalizedData = new double[data.length];
         for (int i = 0; i < data.length; i++) {
-            normalizedData[i] = (data[i] - meanValue) / stdDevValue;
+            if (!Double.isNaN(data[i])) {
+                normalizedData[i] = (data[i] - meanValue) / stdDevValue;
+            } else {
+                // Пропуск не требует нормализации
+                normalizedData[i] = Double.NaN;
+            }
         }
 
         return normalizedData;
     }
 
     public static double[] denormalize(double[] normalizedData) {
-        Mean mean = new Mean();
-        StandardDeviation stdDev = new StandardDeviation();
 
-        double meanValue = mean.evaluate(normalizedData);
-        double stdDevValue = stdDev.evaluate(normalizedData);
+        double meanValue = mean(normalizedData);
+        double stdDevValue = stdDev(normalizedData);
 
         double[] denormalizedData = new double[normalizedData.length];
         for (int i = 0; i < normalizedData.length; i++) {
-            denormalizedData[i] = (normalizedData[i] * stdDevValue) + meanValue;
+            if (!Double.isNaN(normalizedData[i])) {
+                denormalizedData[i] = (normalizedData[i] * stdDevValue) + meanValue;
+            } else {
+                // Пропуск не требует денормализации
+                denormalizedData[i] = Double.NaN;
+            }
         }
 
         return denormalizedData;
+    }
+
+    public static String[] splitStringIntoValues(String input) {
+        String[] parts = input.split(",", -1); // -1 argument to include trailing empty strings
+
+        // Ensure there are at least 11 parts
+        if (parts.length < 11) {
+            // Add empty values if needed
+            int emptyCount = 11 - parts.length;
+            for (int i = 0; i < emptyCount; i++) {
+                input += ",";
+            }
+            parts = input.split(",", -1);
+        }
+
+        return parts;
+    }
+
+    public static double mean(double[] data) {
+        int len = 0;
+        double sum = 0;
+        for (double value : data) {
+            if (!Double.isNaN(value)) {
+                sum += value;
+                len++;
+            }
+        }
+        return sum / len;
+    }
+
+    public static double stdDev(double[] data) {
+        double mean = mean(data);
+        double sumSquaredDiff = 0;
+        int len = 0;
+        for (double value : data) {
+            if (!Double.isNaN(value)) {
+                double diff = value - mean;
+                sumSquaredDiff += diff * diff;
+                len++;
+            }
+        }
+        return Math.sqrt(sumSquaredDiff / len);
     }
 }
