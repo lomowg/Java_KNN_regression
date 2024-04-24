@@ -150,28 +150,24 @@ public class Main {
     }
 
     public static double mean(double[] data) {
-        int len = 0;
         double sum = 0;
         for (double value : data) {
             if (!Double.isNaN(value)) {
                 sum += value;
-                len++;
             }
         }
-        return sum / len;
+        return sum / data.length;
     }
 
     public static double stdDev(double[] data) {
         double mean = mean(data);
         double sumSquaredDiff = 0;
-        int len = 0;
         for (double value : data) {
             if (!Double.isNaN(value)) {
                 double diff = value - mean;
                 sumSquaredDiff += diff * diff;
-                len++;
             }
         }
-        return Math.sqrt(sumSquaredDiff / len);
+        return Math.sqrt(sumSquaredDiff / data.length);
     }
 }
