@@ -1,13 +1,6 @@
 package org.example;
 
-import org.apache.commons.math3.stat.descriptive.moment.Mean;
-import org.apache.commons.math3.stat.descriptive.moment.StandardDeviation;
-
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 public class Main {
 
     public static void main(String[] args) {
@@ -77,11 +70,19 @@ public class Main {
                     if (!parts[i].isEmpty()) {
                         values[i - 6] = Double.parseDouble(parts[i]);
                     }
+                    else {
+                        // Заменяем пропуски на NaN
+                        values[i - 6] = Double.NaN;
+                    }
                 }
 
                 double[] denormalizedValues = denormalize(values);
 
                 writer.write(parts[0]);
+                for (int i = 1; i < 6; i++){
+                    writer.write("," + parts[i]);
+                }
+
                 for (double val : denormalizedValues) {
                     writer.write("," + val);
                 }
