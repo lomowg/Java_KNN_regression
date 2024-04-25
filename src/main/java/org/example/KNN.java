@@ -1,5 +1,7 @@
 package org.example;
 
+import weka.classifiers.lazy.IBk;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.*;
 import weka.filters.*;
 import weka.filters.unsupervised.attribute.*;
@@ -8,10 +10,16 @@ public class KNN {
 
     public static double[][] train(double[][] data) throws Exception {
         Instances instances = createInstances(data);
-        ReplaceMissingValues filter = new ReplaceMissingValues();
 
+        IBk knn = new IBk();
+        knn.setOptions(weka.core.Utils.splitOptions("-K 3"));
+        ReplaceMissingValues filter = new ReplaceMissingValues();
         filter.setInputFormat(instances);
-        Instances filledInstances = Filter.useFilter(instances, filter);
+        FilteredClassifier fc = new FilteredClassifier();
+        fc.setClassifier(knn);
+        fc.setFilter(filter);
+
+        Instances filledInstances = Filter.useFilter(instances, fc.getFilter());
 
         double[][] filledData = getFilledData(filledInstances);
 
@@ -30,7 +38,7 @@ public class KNN {
         Instances instances = new Instances("Data", attributes, data.length);
         for (int i = 0; i < data[0].length; i++) {
             Instance instance = new DenseInstance(data.length);
-            for (int j = 0; j < data[i].length; j++) {
+            for (int j = 0; j < data.length; j++) {
                 instance.setValue((Attribute) attributes.elementAt(j), data[j][i]);
             }
             instances.add(instance);
