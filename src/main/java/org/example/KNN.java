@@ -8,7 +8,7 @@ import weka.filters.unsupervised.attribute.*;
 
 public class KNN {
 
-    public static double[][] train(double[][] data) throws Exception {
+    public double[][] train(double[][] data) throws Exception {
         Instances instances = createInstances(data);
 
         IBk knn = new IBk();
@@ -27,7 +27,7 @@ public class KNN {
     }
 
 
-    private static Instances createInstances(double[][] data) {
+    private Instances createInstances(double[][] data) {
         // Создаем атрибуты
         FastVector attributes = new FastVector();
         for (int i = 0; i < data.length; i++) {
@@ -47,7 +47,7 @@ public class KNN {
         return instances;
     }
 
-    private static double[][] getFilledData(Instances instances) {
+    private double[][] getFilledData(Instances instances) {
         double[][] filledData = new double[instances.numAttributes()][instances.numInstances()];
         for (int i = 0; i < instances.numAttributes(); i++) {
             for (int j = 0; j < instances.numInstances(); j++) {

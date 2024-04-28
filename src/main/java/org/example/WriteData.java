@@ -6,7 +6,7 @@ import java.io.IOException;
 
 public class WriteData {
 
-    public static void write(String csvFilePath, String Header, String[][] table, double[][] table_target) throws IOException {
+    public void write(String csvFilePath, String Header, String[][] table, double[][] table_target) throws IOException {
         BufferedWriter writer = new BufferedWriter(new FileWriter(csvFilePath));
         writer.write(Header + "\n");
 

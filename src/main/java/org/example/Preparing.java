@@ -2,10 +2,10 @@ package org.example;
 
 public class Preparing {
 
-    static double meanValue;
-    static double stdDevValue;
+    double meanValue;
+    double stdDevValue;
 
-    public static double mean(double[] data) {
+    public double mean(double[] data) {
         double sum = 0;
         for (double value : data) {
             if (!Double.isNaN(value)) {
@@ -15,7 +15,7 @@ public class Preparing {
         return sum / data.length;
     }
 
-    public static double stdDev(double[] data) {
+    public double stdDev(double[] data) {
         double mean = mean(data);
         double sumSquaredDiff = 0;
         for (double value : data) {
@@ -27,7 +27,7 @@ public class Preparing {
         return Math.sqrt(sumSquaredDiff / data.length);
     }
 
-    public static double[] normalize(double[] data) {
+    public double[] normalize(double[] data) {
 
         meanValue = mean(data);
         stdDevValue = stdDev(data);
@@ -44,7 +44,7 @@ public class Preparing {
         return normalizedData;
     }
 
-    public static double[] denormalize(double[] normalizedData, double meanVal, double stdDevVal) {
+    public double[] denormalize(double[] normalizedData, double meanVal, double stdDevVal) {
 
         double[] denormalizedData = new double[normalizedData.length];
 
