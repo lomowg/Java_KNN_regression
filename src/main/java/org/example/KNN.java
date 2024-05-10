@@ -1,60 +1,73 @@
 package org.example;
 
-import weka.classifiers.lazy.IBk;
-import weka.classifiers.meta.FilteredClassifier;
-import weka.core.*;
-import weka.filters.*;
-import weka.filters.unsupervised.attribute.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class KNN {
 
-    public double[][] train(double[][] data) throws Exception {
-        Instances instances = createInstances(data);
+    private List<double[]> data;
 
-        IBk knn = new IBk();
-        knn.setOptions(weka.core.Utils.splitOptions("-K 3"));
-        ReplaceMissingValues filter = new ReplaceMissingValues();
-        filter.setInputFormat(instances);
-        FilteredClassifier fc = new FilteredClassifier();
-        fc.setClassifier(knn);
-        fc.setFilter(filter);
-
-        Instances filledInstances = Filter.useFilter(instances, fc.getFilter());
-
-        double[][] filledData = getFilledData(filledInstances);
-
-        return filledData;
+    public KNN(List<double[]> data) {
+        this.data = data;
     }
 
-
-    private Instances createInstances(double[][] data) {
-        // Создаем атрибуты
-        FastVector attributes = new FastVector();
-        for (int i = 0; i < data.length; i++) {
-            Attribute attribute = new Attribute("Attribute_" + i);
-            attributes.addElement(attribute);
-        }
-
-        Instances instances = new Instances("Data", attributes, data.length);
-        for (int i = 0; i < data[0].length; i++) {
-            Instance instance = new DenseInstance(data.length);
-            for (int j = 0; j < data.length; j++) {
-                instance.setValue((Attribute) attributes.elementAt(j), data[j][i]);
-            }
-            instances.add(instance);
-        }
-
-        return instances;
-    }
-
-    private double[][] getFilledData(Instances instances) {
-        double[][] filledData = new double[instances.numAttributes()][instances.numInstances()];
-        for (int i = 0; i < instances.numAttributes(); i++) {
-            for (int j = 0; j < instances.numInstances(); j++) {
-                filledData[i][j] = instances.instance(j).value(i);
+    public void fillMissingValues() {
+        for (int i = 0; i < data.size(); i++) {
+            double[] instance = data.get(i);
+            for (int j = 0; j < instance.length; j++) {
+                if (Double.isNaN(instance[j])) {
+                    double nearestNeighborValue = findNearestNeighborValue(i, j);
+                    instance[j] = nearestNeighborValue;
+                }
             }
         }
-        return filledData;
     }
 
+    private double findNearestNeighborValue(int rowIndex, int columnIndex) {
+        double minDistance = Double.MAX_VALUE;
+        double nearestNeighborValue = 0.0;
+
+        for (int i = 0; i < data.size(); i++) {
+            if (i != rowIndex) {
+                double[] neighbor = data.get(i);
+                double distance = euclideanDistance(data.get(rowIndex), neighbor);
+
+                if (distance < minDistance && !Double.isNaN(neighbor[columnIndex])) {
+                    minDistance = distance;
+                    nearestNeighborValue = neighbor[columnIndex];
+                }
+            }
+        }
+
+        return nearestNeighborValue;
+    }
+
+    private double euclideanDistance(double[] instance1, double[] instance2) {
+        double distance = 0.0;
+        for (int i = 0; i < instance1.length; i++) {
+            if (!Double.isNaN(instance1[i]) && !Double.isNaN(instance2[i])) {
+                distance += Math.pow(instance1[i] - instance2[i], 2);
+            }
+        }
+        return Math.sqrt(distance);
+    }
+
+    public static void main(String[] args) {
+        List<double[]> data = new ArrayList<>();
+        data.add(new double[]{25.0, 1013.2, 10.0, 5.0, 20.0});
+        data.add(new double[]{20.0, Double.NaN, 8.0, 3.0, 15.0});
+        data.add(new double[]{22.0, 1015.5, 12.0, Double.NaN, 18.0});
+        data.add(new double[]{12.0, Double.NaN, 10.0, Double.NaN, Double.NaN});
+        data.add(new double[]{22.0, 1013.2, Double.NaN, Double.NaN, Double.NaN});
+
+        KNN imputer = new KNN(data);
+        imputer.fillMissingValues();
+
+        for (double[] instance : data) {
+            for (double value : instance) {
+                System.out.print(value + "\t");
+            }
+            System.out.println();
+        }
+    }
 }
