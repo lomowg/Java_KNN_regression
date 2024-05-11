@@ -1,16 +1,18 @@
 package org.example;
 
+import java.io.IOException;
 
 public class Main {
-    public static void main(String[] args) throws Exception {
-        String csvFilePath = "Data_2.csv";
+    public static void main(String[] args) throws IOException {
+
+        String csvFilePath = "Data_2_2.csv";
 
         ReadData rd = new ReadData();
         WriteData wd = new WriteData();
         Preparing prep = new Preparing();
-        KNN KNNRegression = new KNN();
 
         rd.load(csvFilePath);
+
 
         double[][] targets = rd.table_target;
 
@@ -23,7 +25,12 @@ public class Main {
             std_val[col] = prep.stdDevValue;
         }
 
-        double[][] knn_targets = KNNRegression.train(targets);
+        targets = transpose(targets);
+
+        KNN imputer = new KNN(targets);
+        imputer.fillMissingValues();
+
+        double[][] knn_targets = transpose(targets);
 
         for (int col = 0; col < knn_targets.length; col++) {
             knn_targets[col] = prep.denormalize(knn_targets[col], mean_val[col], std_val[col]);
@@ -31,5 +38,20 @@ public class Main {
 
         wd.write("KNN_test.csv", rd.header, rd.table, knn_targets);
 
+    }
+
+    public static double[][] transpose(double[][] matrix) {
+        int rows = matrix.length;
+        int cols = matrix[0].length;
+
+        double[][] transposed = new double[cols][rows];
+
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                transposed[j][i] = matrix[i][j];
+            }
+        }
+
+        return transposed;
     }
 }
