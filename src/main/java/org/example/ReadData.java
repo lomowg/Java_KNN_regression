@@ -5,8 +5,8 @@ import java.io.*;
 public class ReadData {
     public String header;
 
-    public double[][] table_target = new double[5][1455324];
-    public String[][] table = new String[6][1455324];
+    public double[][] table_target = new double[5][456226];
+    public String[][] table = new String[6][456226];
 
     public void load(String csvFilePath) {
         try {
